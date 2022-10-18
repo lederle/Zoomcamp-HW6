@@ -40,7 +40,7 @@ def plot_log_transform_of_median_house_price(df):
     save_fig("log_transform_median_house_price")
     plt.show()
 
-def split_data(df):
+def prepare_data(df):
     full, test = train_test_split(df, test_size = 0.2, random_state = 1)
     train, val = train_test_split(full, test_size = 0.25, random_state = 1)
     for d in [train, val, test]:
@@ -55,4 +55,7 @@ def split_data(df):
     del test["median_house_value"]
 
     return (train, y_train), (val, y_val), (test, y_test)
+
+def dict_vectorize(dv, df):
+    return dv.fit_transform(df.to_dict(orient = "records"))
 
