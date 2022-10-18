@@ -5,6 +5,8 @@ import urllib.request
 import matplotlib.pyplot as plt
 import numpy as np
 
+from sklearn.model_selection import train_test_split
+
 def load_housing_data():
     csv_path = Path("datasets/housing.csv")
     if not csv_path.is_file():
@@ -25,6 +27,8 @@ def save_fig(fig_id, tight_layout = True, fig_extension = "png", resolution = 30
 def fill_na(df):
     df.fillna(0, inplace = True)
 
+def transform_label(df):
+   return np.log1p(df["median_house_value"])
 
 def plot_log_transform_of_median_house_price(df):
     fig, axs = plt.subplots(1, 2, figsize = (8, 3), sharey = True)
@@ -35,4 +39,12 @@ def plot_log_transform_of_median_house_price(df):
     axs[1].set_xlabel("Log of Median House Value")
     save_fig("log_transform_median_house_price")
     plt.show()
+
+def split_data(df):
+    full, test = train_test_split(df, test_size = 0.2, random_state = 1)
+    train, val = train_test_split(full, test_size = 0.25, random_state = 1)
+    for d in [train, val, test]:
+        d.reset_index(drop = True, inplace = True)
+
+    return (train, train["median_house_value"].values), (val, val["median_house_value"].values), (test, test["median_house_value"].values)
 
