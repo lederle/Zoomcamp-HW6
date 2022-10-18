@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from sklearn.model_selection import train_test_split
+from sklearn.tree import export_text
 
 def load_housing_data():
     csv_path = Path("datasets/housing.csv")
@@ -57,5 +58,11 @@ def prepare_data(df):
     return (train, y_train), (val, y_val), (test, y_test)
 
 def dict_vectorize(dv, df):
-    return dv.fit_transform(df.to_dict(orient = "records"))
+    return dv.transform(rows_as_dict(df))
 
+def rows_as_dict(data):
+    return data.to_dict(orient = 'records')
+
+def tree_regression(dtr, dv, X, y):
+    dtr.fit(X, y)
+    print(export_text(dtr, feature_names = dv.get_feature_names_out().tolist()))
