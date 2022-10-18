@@ -46,5 +46,13 @@ def split_data(df):
     for d in [train, val, test]:
         d.reset_index(drop = True, inplace = True)
 
-    return (train, train["median_house_value"].values), (val, val["median_house_value"].values), (test, test["median_house_value"].values)
+    y_train = train["median_house_value"].values
+    y_val = val["median_house_value"].values
+    y_test = test["median_house_value"].values
+
+    del train["median_house_value"]
+    del val["median_house_value"]
+    del test["median_house_value"]
+
+    return (train, y_train), (val, y_val), (test, y_test)
 
