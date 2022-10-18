@@ -22,6 +22,10 @@ def save_fig(fig_id, tight_layout = True, fig_extension = "png", resolution = 30
         plt.tight_layout()
         plt.savefig(path, format = fig_extension, dpi = resolution)
 
+def fill_na(df):
+    df.fillna(0, inplace = True)
+
+
 def plot_log_transform_of_median_house_price(df):
     fig, axs = plt.subplots(1, 2, figsize = (8, 3), sharey = True)
     df["median_house_value"].hist(ax = axs[0], bins = 50)
