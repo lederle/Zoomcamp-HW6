@@ -7,6 +7,9 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 from sklearn.tree import export_text
+from sklearn.metrics import mean_squared_error
+from sklearn.ensemble import RandomForestRegressor
+from tqdm.auto import tqdm
 
 def load_housing_data():
     csv_path = Path("datasets/housing.csv")
@@ -66,3 +69,29 @@ def rows_as_dict(data):
 def tree_regression(dtr, dv, X, y):
     dtr.fit(X, y)
     print(export_text(dtr, feature_names = dv.get_feature_names_out().tolist()))
+
+def random_forest_regression(rf, X, y, val, y_val, Q2 = True):
+    rf.fit(X, y)
+    pred = rf.predict(val)
+    rmse = np.sqrt(mean_squared_error(pred, y_val))
+    if Q2:
+        print(rmse)
+    return rmse 
+
+def optimize_N_estimators(X, y, val, y_val):
+    scores = []
+    for n in tqdm(range(10, 201, 10)):
+        rf = RandomForestRegressor(n_estimators = n, random_state = 1, n_jobs = -1)
+        scores.append(random_forest_regression(rf, X, y, val, y_val, Q2 = False))
+    return pd.DataFrame({"n_estimator": list(range(10, 201, 10)), "scores": scores})
+        
+def optimize_max_depth(X, y, val, y_val):
+    scores = []
+
+    for d in tqdm([10, 15, 20, 25]):
+        rf = RandomForestRegressor(n_estimators = 1, max_depth = d, random_state = 1, warm_start = True)
+        for n in tqdm(range(10, 201, 10)):
+            rf.n_estimators = n
+            scores.append((d, n, random_forest_regression(rf, X, y, val, y_val, Q2 = False)))
+    columns = ["max_depth", "n_estimator", "rmse"]
+    return pd.DataFrame(scores, columns = columns)
