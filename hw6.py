@@ -10,6 +10,7 @@ from sklearn.tree import export_text
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 from tqdm.auto import tqdm
+import xgboost as xgb
 
 def load_housing_data():
     csv_path = Path("datasets/housing.csv")
@@ -95,3 +96,30 @@ def optimize_max_depth(X, y, val, y_val):
             scores.append((d, n, random_forest_regression(rf, X, y, val, y_val, Q2 = False)))
     columns = ["max_depth", "n_estimator", "rmse"]
     return pd.DataFrame(scores, columns = columns)
+
+def xgb_compare_eta(dv, X, y, val, y_val):
+    features = dv.get_feature_names_out()
+    dtrain = xgb.DMatrix(X, label = y, feature_names = features)
+    dval = xgb.DMatrix(val, label = y_val, feature_names = features)
+    watchlist = [(dtrain, 'train'), (dval, 'val')]
+    scores = {}
+    for eta in [0.3, 0.1]:
+        xgb_params = {
+            'eta': eta,
+            'max_depth': 6,
+            'min_child_weight': 1,
+            'objective': 'reg:squarederror',
+            'nthread': 8,
+            'seed': 1,
+            'verbosity': 1,
+        }
+
+        progress = {}
+        model = xgb.train(xgb_params, dtrain, num_boost_round=100,
+                          verbose_eval=5, evals=watchlist, evals_result = progress)
+
+        idx = f"eta={str(eta)}"
+        scores[idx] = pd.DataFrame({"round": list(range(100)),
+                        "train": progress["train"]["rmse"],
+                        "val": progress["val"]["rmse"]})
+    return scores
