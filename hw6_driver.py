@@ -4,6 +4,9 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 
 import matplotlib.pyplot as plt
+import pandas as pd
+
+import xgboost as xgb
 
 
 df = hw6.load_housing_data()
@@ -31,11 +34,23 @@ if False:
     print(scores_df)
 
 # Question 4
-df_scores = hw6.optimize_max_depth(X_train, y_train, X_val, y_val)
+if False:
+    df_scores = hw6.optimize_max_depth(X_train, y_train, X_val, y_val)
 
-for d in [10, 15, 20, 25]:
-    df_subset = df_scores[df_scores.max_depth == d]
-    plt.plot(df_subset["n_estimator"], df_subset["rmse"], label = d)
+    for d in [10, 15, 20, 25]:
+        df_subset = df_scores[df_scores.max_depth == d]
+        plt.plot(df_subset["n_estimator"], df_subset["rmse"], label = d)
 
-plt.legend()
-hw6.save_fig("max_depth_plot")
+    plt.legend()
+    hw6.save_fig("max_depth_plot")
+
+# Question 5
+rf = RandomForestRegressor(n_estimators = 10, max_depth = 20, random_state = 1, n_jobs = -1)
+rf.fit(X_train, y_train)
+important = pd.DataFrame({"feature": dv.get_feature_names_out().tolist(), "importance": rf.feature_importances_})
+print("\n")
+print(important.sort_values(by = "importance", ascending = False).head(3))
+
+# Question 6
+features = dv.get_feature_names_out()
+
